@@ -1,0 +1,1068 @@
+import React, { useState } from 'react';
+import { CheckCircle, Circle, ChevronDown, ChevronRight, Github, Cloud, Smartphone } from 'lucide-react';
+
+const LauncherRoadmap = () => {
+  const [expandedPhases, setExpandedPhases] = useState({});
+  const [completedTasks, setCompletedTasks] = useState({});
+
+  const roadmap = [
+    {
+      phase: "Faz 0: GitHub & Cloud Setup",
+      duration: "1 Gün",
+      color: "bg-gray-500",
+      icon: <Github size={24} />,
+      tasks: [
+        {
+          id: 1,
+          title: "GitHub Repository Oluşturma",
+          details: [
+            "GitHub hesabı aç (ücretsiz)",
+            "New Repository → 'windows11-launcher'",
+            "Public olarak oluştur",
+            "README.md ekle",
+            ".gitignore → Android seç"
+          ],
+          code: `# GitHub Repository Yapısı:
+windows11-launcher/
+├── .github/
+│   └── workflows/          # CI/CD için
+├── app/
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/com/yourname/launcher/
+│   │       ├── res/
+│   │       └── AndroidManifest.xml
+│   └── build.gradle.kts
+├── gradle/
+├── build.gradle.kts
+└── settings.gradle.kts
+
+# İlk commit:
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/username/windows11-launcher.git
+git push -u origin main`
+        },
+        {
+          id: 2,
+          title: "GitHub Codespaces Aktifleştirme",
+          details: [
+            "Repository → Code → Codespaces tab",
+            "Create codespace on main",
+            "VS Code browser'da açılır",
+            "Android development için gerekli extension'ları yükle"
+          ],
+          code: `# .devcontainer/devcontainer.json oluştur:
+{
+  "name": "Android Launcher Dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "mathiasfrohlich.Kotlin",
+        "fwcd.kotlin",
+        "vscjava.vscode-gradle"
+      ]
+    }
+  },
+  "postCreateCommand": "chmod +x gradlew && ./gradlew --version",
+  "forwardPorts": [8080]
+}`
+        },
+        {
+          id: 3,
+          title: "Alternatif: Gitpod veya Replit",
+          details: [
+            "Gitpod: gitpod.io/# + GitHub repo URL",
+            "Replit: Android Java/Kotlin template",
+            "Her ikisi de ücretsiz tier sunuyor",
+            "Browser'dan full IDE deneyimi"
+          ],
+          code: `# Gitpod için .gitpod.yml:
+image: gitpod/workspace-full
+
+tasks:
+  - name: Setup Android
+    init: |
+      sdk install java 17.0.7-tem
+      sdk use java 17.0.7-tem
+      ./gradlew --version
+    command: echo "Ready to code!"
+
+vscode:
+  extensions:
+    - fwcd.kotlin
+    - mathiasfrohlich.Kotlin
+
+# Replit için .replit:
+run = "./gradlew assembleDebug"
+language = "kotlin"`
+        }
+      ]
+    },
+    {
+      phase: "Faz 1: Proje İskeletini Oluşturma",
+      duration: "1-2 Gün",
+      color: "bg-blue-500",
+      icon: <Cloud size={24} />,
+      tasks: [
+        {
+          id: 4,
+          title: "Manual Gradle Project Setup",
+          details: [
+            "Android Studio template kullanmadan manuel oluştur",
+            "Gradle Kotlin DSL kullan",
+            "Compose dependencies ekle",
+            "GitHub'a push et"
+          ],
+          code: `// settings.gradle.kts
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "Windows11Launcher"
+include(":app")
+
+// build.gradle.kts (root)
+plugins {
+    id("com.android.application") version "8.1.0" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.10" apply false
+}
+
+// build.gradle.kts (app)
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+}
+
+android {
+    namespace = "com.yourname.launcher"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.yourname.launcher"
+        minSdk = 26
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+dependencies {
+    // Compose BOM
+    val composeBom = platform("androidx.compose:compose-bom:2023.10.01")
+    implementation(composeBom)
+    
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.activity:activity-compose:1.8.0")
+    implementation("androidx.core:core-ktx:1.12.0")
+    
+    // Coil for images
+    implementation("io.coil-kt:coil-compose:2.5.0")
+}`
+        },
+        {
+          id: 5,
+          title: "Temel Dosya Yapısını Oluştur",
+          details: [
+            "GitHub web editor'de dosyaları manuel oluştur",
+            "Veya Codespaces'te VS Code kullan",
+            "MainActivity, manifest, resources"
+          ],
+          code: `// app/src/main/java/com/yourname/launcher/MainActivity.kt
+package com.yourname.launcher
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            LauncherTheme {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    Text("Windows 11 Launcher")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LauncherTheme(content: @Composable () -> Unit) {
+    MaterialTheme {
+        content()
+    }
+}
+
+// app/src/main/AndroidManifest.xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Windows11 Launcher"
+        android:theme="@style/Theme.AppCompat.NoActionBar">
+        
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:stateNotNeeded="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>`
+        },
+        {
+          id: 6,
+          title: "GitHub Actions ile Build Otomasyonu",
+          details: [
+            "Her commit'te otomatik APK build et",
+            "APK'yı artifact olarak sakla",
+            "Release tag'lerinde APK yayınla"
+          ],
+          code: `# .github/workflows/android-build.yml
+name: Android CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Build with Gradle
+      run: ./gradlew assembleDebug
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug
+        path: app/build/outputs/apk/debug/app-debug.apk
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: app/build/outputs/apk/debug/app-debug.apk
+      env:
+        GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}`
+        }
+      ]
+    },
+    {
+      phase: "Faz 2: Core Launcher Logic",
+      duration: "3-4 Gün",
+      color: "bg-purple-500",
+      icon: <Smartphone size={24} />,
+      tasks: [
+        {
+          id: 7,
+          title: "Uygulama Listesi Repository",
+          details: [
+            "GitHub'da yeni branch: feature/app-list",
+            "Web editor'de AppRepository.kt oluştur",
+            "PackageManager kullan",
+            "Pull request oluştur"
+          ],
+          code: `// app/src/main/java/com/yourname/launcher/data/AppInfo.kt
+package com.yourname.launcher.data
+
+import android.graphics.drawable.Drawable
+
+data class AppInfo(
+    val name: String,
+    val packageName: String,
+    val icon: Drawable,
+    val launchIntent: android.content.Intent?
+)
+
+// app/src/main/java/com/yourname/launcher/data/AppRepository.kt
+package com.yourname.launcher.data
+
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+
+class AppRepository(private val context: Context) {
+    
+    fun getInstalledApps(): List<AppInfo> {
+        val pm = context.packageManager
+        val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+        
+        return pm.queryIntentActivities(mainIntent, 0)
+            .mapNotNull { resolveInfo ->
+                try {
+                    val activityInfo = resolveInfo.activityInfo
+                    val launchIntent = pm.getLaunchIntentForPackage(
+                        activityInfo.packageName
+                    )
+                    
+                    AppInfo(
+                        name = resolveInfo.loadLabel(pm).toString(),
+                        packageName = activityInfo.packageName,
+                        icon = resolveInfo.loadIcon(pm),
+                        launchIntent = launchIntent
+                    )
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            .sortedBy { it.name.lowercase() }
+    }
+    
+    fun launchApp(packageName: String) {
+        val intent = context.packageManager
+            .getLaunchIntentForPackage(packageName)
+        intent?.let { context.startActivity(it) }
+    }
+}`
+        },
+        {
+          id: 8,
+          title: "ViewModel ile State Management",
+          details: [
+            "Branch: feature/viewmodel",
+            "LauncherViewModel.kt oluştur",
+            "Search functionality ekle",
+            "GitHub'da commit ve push"
+          ],
+          code: `// app/src/main/java/com/yourname/launcher/ui/LauncherViewModel.kt
+package com.yourname.launcher.ui
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.yourname.launcher.data.AppInfo
+import com.yourname.launcher.data.AppRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+class LauncherViewModel(application: Application) : AndroidViewModel(application) {
+    
+    private val repository = AppRepository(application)
+    
+    private val _allApps = MutableStateFlow<List<AppInfo>>(emptyList())
+    private val _filteredApps = MutableStateFlow<List<AppInfo>>(emptyList())
+    val filteredApps: StateFlow<List<AppInfo>> = _filteredApps.asStateFlow()
+    
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    
+    init {
+        loadApps()
+    }
+    
+    private fun loadApps() {
+        viewModelScope.launch {
+            val apps = repository.getInstalledApps()
+            _allApps.value = apps
+            _filteredApps.value = apps
+        }
+    }
+    
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+        filterApps(query)
+    }
+    
+    private fun filterApps(query: String) {
+        _filteredApps.value = if (query.isEmpty()) {
+            _allApps.value
+        } else {
+            _allApps.value.filter { app ->
+                app.name.contains(query, ignoreCase = true)
+            }
+        }
+    }
+    
+    fun launchApp(packageName: String) {
+        repository.launchApp(packageName)
+    }
+}
+
+// build.gradle.kts dependency ekle:
+// implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")`
+        }
+      ]
+    },
+    {
+      phase: "Faz 3: Windows 11 UI Implementation",
+      duration: "4-5 Gün",
+      color: "bg-green-500",
+      icon: <Cloud size={24} />,
+      tasks: [
+        {
+          id: 9,
+          title: "Composable UI Components",
+          details: [
+            "Branch: feature/windows11-ui",
+            "GitHub web editor kullan",
+            "LauncherScreen.kt, AppIconGrid.kt oluştur",
+            "Her component ayrı dosyada"
+          ],
+          code: `// app/src/main/java/com/yourname/launcher/ui/LauncherScreen.kt
+package com.yourname.launcher.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+@Composable
+fun LauncherScreen(viewModel: LauncherViewModel = viewModel()) {
+    val apps by viewModel.filteredApps.collectAsState()
+    val query by viewModel.searchQuery.collectAsState()
+    
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.85f))
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(40.dp))
+            
+            SearchBar(
+                query = query,
+                onQueryChange = { viewModel.updateSearchQuery(it) }
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            AppGrid(
+                apps = apps,
+                onAppClick = { viewModel.launchApp(it) }
+            )
+        }
+    }
+}
+
+// app/src/main/java/com/yourname/launcher/ui/SearchBar.kt
+@Composable
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .height(56.dp),
+        placeholder = { Text("Search apps...") },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Color.White.copy(0.1f),
+            unfocusedContainerColor = Color.White.copy(0.05f),
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White
+        ),
+        shape = MaterialTheme.shapes.large
+    )
+}`
+        },
+        {
+          id: 10,
+          title: "App Grid Component",
+          details: [
+            "LazyVerticalGrid kullan",
+            "Glassmorphism effect",
+            "Click animations",
+            "Async icon loading (Coil)"
+          ],
+          code: `// app/src/main/java/com/yourname/launcher/ui/AppGrid.kt
+package com.yourname.launcher.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.yourname.launcher.data.AppInfo
+
+@Composable
+fun AppGrid(
+    apps: List<AppInfo>,
+    onAppClick: (String) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(4),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        items(apps, key = { it.packageName }) { app ->
+            AppIcon(
+                app = app,
+                onClick = { onAppClick(app.packageName) }
+            )
+        }
+    }
+}
+
+@Composable
+fun AppIcon(
+    app: AppInfo,
+    onClick: () -> Unit
+) {
+    var isPressed by remember { mutableStateOf(false) }
+    
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clickable {
+                isPressed = true
+                onClick()
+            }
+            .scale(if (isPressed) 0.9f else 1f)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = Color.White.copy(alpha = 0.12f),
+            modifier = Modifier.size(64.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                AsyncImage(
+                    model = app.icon,
+                    contentDescription = app.name,
+                    modifier = Modifier.size(44.dp)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(6.dp))
+        
+        Text(
+            text = app.name,
+            color = Color.White,
+            fontSize = 11.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(64.dp)
+        )
+    }
+    
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            kotlinx.coroutines.delay(150)
+            isPressed = false
+        }
+    }
+}`
+        }
+      ]
+    },
+    {
+      phase: "Faz 4: Build & Test on Device",
+      duration: "1-2 Gün",
+      color: "bg-orange-500",
+      icon: <Smartphone size={24} />,
+      tasks: [
+        {
+          id: 11,
+          title: "GitHub Actions ile APK Oluştur",
+          details: [
+            "Main branch'e merge et",
+            "GitHub Actions otomatik çalışır",
+            "Actions tab'den APK indir",
+            "Telefona yükle ve test et"
+          ],
+          code: `# APK İndirme Adımları:
+1. GitHub repo → Actions tab
+2. Son başarılı workflow'u seç
+3. Artifacts bölümünden 'app-debug' indir
+4. ZIP'i aç → app-debug.apk
+
+# Telefona Yükleme:
+1. APK'yı telefona gönder (USB, Drive, vb.)
+2. Ayarlar → Güvenlik → Bilinmeyen Kaynaklar ✓
+3. APK'ya tıkla → Yükle
+4. Ana Ekran tuşuna bas
+5. Launcher seçim ekranı gelir
+6. "Windows11 Launcher" seç
+7. "Always" veya "Just once"
+
+# Test Checklist:
+□ Uygulamalar görünüyor mu?
+□ Arama çalışıyor mu?
+□ Uygulama açılıyor mu?
+□ Animasyonlar akıcı mı?
+□ Icon'lar yükleniyor mu?`
+        },
+        {
+          id: 12,
+          title: "Remote Debugging Setup",
+          details: [
+            "Chrome DevTools ile debug",
+            "Logcat için ADB wireless",
+            "GitHub Issues ile bug tracking"
+          ],
+          code: `# ADB Wireless Bağlantı (Android 11+):
+# Telefonda:
+Geliştirici Seçenekleri → Kablosuz hata ayıklama → ON
+IP adresini ve portu not al (örn: 192.168.1.5:5555)
+
+# Bilgisayarda:
+adb connect 192.168.1.5:5555
+adb devices  # bağlı cihazları göster
+adb logcat | grep "Windows11Launcher"
+
+# GitHub Issues Template:
+## Bug Report
+**Device:** Samsung Galaxy S21
+**Android Version:** 13
+**Launcher Version:** v1.0
+
+**Steps to Reproduce:**
+1. ...
+2. ...
+
+**Expected:** 
+**Actual:** 
+**Screenshots:** 
+
+# Kodda logging ekle:
+import android.util.Log
+
+private const val TAG = "LauncherViewModel"
+
+fun loadApps() {
+    Log.d(TAG, "Loading apps...")
+    // ...
+    Log.d(TAG, "Loaded \${apps.size} apps")
+}`
+        }
+      ]
+    },
+    {
+      phase: "Faz 5: Polish & Release",
+      duration: "2-3 Gün",
+      color: "bg-pink-500",
+      icon: <Github size={24} />,
+      tasks: [
+        {
+          id: 13,
+          title: "Ayarlar Ekranı",
+          details: [
+            "Branch: feature/settings",
+            "SharedPreferences kullan",
+            "Grid size, blur intensity ayarları",
+            "GitHub'a push"
+          ],
+          code: `// app/src/main/java/com/yourname/launcher/data/PreferencesManager.kt
+package com.yourname.launcher.data
+
+import android.content.Context
+import android.content.SharedPreferences
+
+class PreferencesManager(context: Context) {
+    private val prefs: SharedPreferences = 
+        context.getSharedPreferences("launcher_prefs", Context.MODE_PRIVATE)
+    
+    var gridColumns: Int
+        get() = prefs.getInt("grid_columns", 4)
+        set(value) = prefs.edit().putInt("grid_columns", value).apply()
+    
+    var iconSize: Int
+        get() = prefs.getInt("icon_size", 64)
+        set(value) = prefs.edit().putInt("icon_size", value).apply()
+}`
+        },
+        {
+          id: 14,
+          title: "Release Build & Distribution",
+          details: [
+            "Version tag oluştur (v1.0.0)",
+            "GitHub Release sayfası hazırla",
+            "Signed APK için keystore",
+            "README.md güncelle"
+          ],
+          code: `# Release Oluşturma:
+git tag -a v1.0.0 -m "First stable release"
+git push origin v1.0.0
+
+# GitHub Actions otomatik APK oluşturur
+
+# README.md Template:
+# 🪟 Windows 11 Launcher for Android
+
+Modern, minimalist Android launcher inspired by Windows 11 design.
+
+## ✨ Features
+- 🎨 Windows 11 style UI
+- 🔍 Fast app search
+- 🌙 Dark theme
+- ⚡ Lightweight & smooth
+
+## 📦 Download
+[Download APK](https://github.com/username/windows11-launcher/releases/latest)
+
+## 🛠️ Built With
+- Kotlin
+- Jetpack Compose
+- Material 3
+
+## 📱 Screenshots
+[Add screenshots]
+
+## 🤝 Contributing
+Pull requests welcome!
+
+## 📄 License
+MIT License
+
+# Signed APK için:
+# app/build.gradle.kts ekle:
+signingConfigs {
+    create("release") {
+        storeFile = file("keystore.jks")
+        storePassword = System.getenv("KEYSTORE_PASSWORD")
+        keyAlias = "launcher"
+        keyPassword = System.getenv("KEY_PASSWORD")
+    }
+}
+
+buildTypes {
+    release {
+        signingConfig = signingConfigs.getByName("release")
+        isMinifyEnabled = true
+        proguardFiles(...)
+    }
+}`
+        }
+      ]
+    }
+  ];
+
+  const togglePhase = (index) => {
+    setExpandedPhases(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  const toggleTask = (taskId) => {
+    setCompletedTasks(prev => ({
+      ...prev,
+      [taskId]: !prev[taskId]
+    }));
+  };
+
+  const getProgress = (phase) => {
+    const total = phase.tasks.length;
+    const completed = phase.tasks.filter(t => completedTasks[t.id]).length;
+    return Math.round((completed / total) * 100);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <Github className="text-white" size={48} />
+            <h1 className="text-5xl font-bold text-white">
+              Cloud-First Development
+            </h1>
+          </div>
+          <p className="text-xl text-purple-200 mb-6">
+            Android Studio Kullanmadan GitHub ile Launcher Geliştirme
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-full">
+              <span className="text-white font-semibold">✅ GitHub Codespaces</span>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-full">
+              <span className="text-white font-semibold">✅ GitHub Actions CI/CD</span>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-full">
+              <span className="text-white font-semibold">✅ Web-Based IDE</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/10 mb-8">
+          <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <Cloud className="text-blue-300" />
+            Geliştirme Akışı
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4 text-white">
+            <div className="bg-white/5 rounded-lg p-4">
+              <div className="text-3xl mb-2">💻</div>
+              <div className="font-semibold mb-1">1. Code</div>
+              <div className="text-sm text-gray-300">GitHub web editor veya Codespaces</div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-4">
+              <div className="text-3xl mb-2">🔨</div>
+              <div className="font-semibold mb-1">2. Build</div>
+              <div className="text-sm text-gray-300">GitHub Actions otomatik APK</div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-4">
+              <div className="text-3xl mb-2">📱</div>
+              <div className="font-semibold mb-1">3. Test</div>
+              <div className="text-sm text-gray-300">APK indir → Telefonuna yükle</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {roadmap.map((phase, phaseIndex) => {
+            const progress = getProgress(phase);
+            const isExpanded = expandedPhases[phaseIndex];
+
+            return (
+              <div 
+                key={phaseIndex}
+                className="bg-white/5 backdrop-blur-lg rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+              >
+                <div 
+                  className="p-6 cursor-pointer hover:bg-white/5 transition-all"
+                  onClick={() => togglePhase(phaseIndex)}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-4">
+                      {isExpanded ? 
+                        <ChevronDown className="text-white" size={24} /> : 
+                        <ChevronRight className="text-white" size={24} />
+                      }
+                      <div className="text-white">{phase.icon}</div>
+                      <div className={`w-3 h-3 rounded-full ${phase.color}`} />
+                      <h2 className="text-2xl font-bold text-white">
+                        {phase.phase}
+                      </h2>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-purple-300 text-sm font-medium bg-purple-500/20 px-4 py-1 rounded-full">
+                        {phase.duration}
+                      </span>
+                      <span className="text-green-300 text-sm font-bold">
+                        {progress}%
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${phase.color} transition-all duration-500`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div className="px-6 pb-6 space-y-4">
+                    {phase.tasks.map((task) => (
+                      <div 
+                        key={task.id}
+                        className="bg-white/5 rounded-xl p-5 border border-white/10"
+                      >
+                        <div 
+                          className="flex items-start gap-3 cursor-pointer"
+                          onClick={() => toggleTask(task.id)}
+                        >
+                          {completedTasks[task.id] ? 
+                            <CheckCircle className="text-green-400 flex-shrink-0 mt-1" size={24} /> :
+                            <Circle className="text-gray-400 flex-shrink-0 mt-1" size={24} />
+                          }
+                          <div className="flex-1">
+                            <h3 className={`text-xl font-semibold mb-3 ${
+                              completedTasks[task.id] ? 'text-green-300 line-through' : 'text-white'
+                            }`}>
+                              {task.title}
+                            </h3>
+                            
+                            <ul className="space-y-2 mb-4">
+                              {task.details.map((detail, i) => (
+                                <li key={i} className="text-purple-200 flex items-start gap-2">
+                                  <span className="text-purple-400 mt-1">▸</span>
+                                  <span>{detail}</span>
+                                </li>
+                              ))}
+                            </ul>
+
+                            {task.code && (
+                              <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                                <pre className="text-sm text-green-300 overflow-x-auto whitespace-pre-wrap">
+                                  <code>{task.code}</code>
+                                </pre>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-12 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
+          <h3 className="text-2xl font-bold text-white mb-6">
+            🎯 GitHub Workflow Özeti
+          </h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <div className="text-purple-300 font-semibold text-lg">📝 Kod Yazma Araçları:</div>
+              <ul className="text-purple-200 space-y-2">
+                <li>• <strong>GitHub Web Editor:</strong> Tarayıcıdan direkt dosya düzenle</li>
+                <li>• <strong>GitHub Codespaces:</strong> VS Code browser'da açılır</li>
+                <li>• <strong>Gitpod.io:</strong> Alternatif cloud IDE</li>
+                <li>• <strong>Replit:</strong> Android template ile hızlı başla</li>
+              </ul>
+            </div>
+            <div className="space-y-3">
+              <div className="text-pink-300 font-semibold text-lg">🚀 Build & Deploy:</div>
+              <ul className="text-pink-200 space-y-2">
+                <li>• <strong>Push to GitHub:</strong> Kod değişikliği yap</li>
+                <li>• <strong>GitHub Actions:</strong> Otomatik APK build</li>
+                <li>• <strong>Download APK:</strong> Actions/Artifacts'ten indir</li>
+                <li>• <strong>Install:</strong> Telefonuna yükle ve test et</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
+          <h3 className="text-2xl font-bold text-white mb-6">
+            💡 Pro İpuçları
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="bg-white/5 rounded-lg p-4">
+              <div className="text-2xl mb-2">⚡</div>
+              <div className="font-semibold text-white mb-2">Hızlı Geliştirme</div>
+              <div className="text-sm text-gray-300">
+                Her küçük değişiklikte commit at. GitHub Actions hemen APK oluşturur.
+              </div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-4">
+              <div className="text-2xl mb-2">🌿</div>
+              <div className="font-semibold text-white mb-2">Branch Kullan</div>
+              <div className="text-sm text-gray-300">
+                Her özellik için yeni branch. Stable main branch'i koru.
+              </div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-4">
+              <div className="text-2xl mb-2">📱</div>
+              <div className="font-semibold text-white mb-2">Telefonda Test</div>
+              <div className="text-sm text-gray-300">
+                APK'yı Google Drive'a at, telefonda direkt indir ve yükle.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 text-center">
+          <div className="inline-block bg-white/10 backdrop-blur-md rounded-full px-8 py-4">
+            <p className="text-white text-lg">
+              Toplam İlerleme: <span className="font-bold text-green-300">
+                {Math.round(Object.values(completedTasks).filter(Boolean).length / roadmap.reduce((acc, p) => acc + p.tasks.length, 0) * 100)}%
+              </span>
+            </p>
+          </div>
+          <div className="mt-6">
+            <a 
+              href="https://github.com/new" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-8 py-4 rounded-full hover:scale-105 transition-transform shadow-lg"
+            >
+              <Github size={24} />
+              Hemen Başla - Yeni Repo Oluştur
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LauncherRoadmap;
