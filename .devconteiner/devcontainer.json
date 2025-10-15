@@ -1,0 +1,21 @@
+{
+  "name": "Android Launcher Dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "mathiasfrohlich.Kotlin",
+        "fwcd.kotlin",
+        "vscjava.vscode-gradle"
+      ]
+    }
+  },
+  "postCreateCommand": "chmod +x gradlew && ./gradlew --version",
+  "forwardPorts": [8080]
+}
